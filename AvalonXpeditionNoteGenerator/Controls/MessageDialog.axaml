@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:AvalonXpeditionNoteGenerator.Controls"
+             x:DataType="controls:MessageDialog"
+             x:Class="AvalonXpeditionNoteGenerator.Controls.MessageDialog">
+    <Border Background="White" 
+            Padding="10" 
+            CornerRadius="8"
+            BoxShadow="0 2 8 0 #10000000">
+        <StackPanel Margin="20" Spacing="20">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
+            <Button Content="OK" Command="{Binding CloseCommand}" 
+                    HorizontalAlignment="Right" Padding="30,10, 30 ,10" />
+        </StackPanel>
+    </Border>
+</Window>
+

@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report ScriptLanguage="CSharp" ReportInfo.Created="09/24/2025 13:57:09" ReportInfo.Modified="10/03/2025 16:46:37" ReportInfo.CreatorVersion="2025.2.0.0">
+  <Dictionary>
+    <Parameter Name="NoteNumberParam" DataType="System.String" AsString=""/>
+    <Parameter Name="NoteDateParam" DataType="System.DateTime" AsString=""/>
+    <Parameter Name="ClientParam" DataType="System.String" AsString=""/>
+    <Parameter Name="ReceiptNumParam" DataType="System.String" AsString=""/>
+    <Parameter Name="ReceiptCodeParam" DataType="System.String" AsString=""/>
+    <Parameter Name="VehicleNoParam" DataType="System.String" AsString=""/>
+    <Parameter Name="DriverNameParam" DataType="System.String" AsString=""/>
+    <Parameter Name="QtyParam" DataType="System.Double" AsString=""/>
+    <Parameter Name="ProductParam" DataType="System.String" AsString=""/>
+    <Parameter Name="AddedWaterParam" DataType="System.Boolean" AsString=""/>
+  </Dictionary>
+  <ReportPage Name="MainPage" Watermark.Font="Arial, 60pt">
+    <DataBand Name="Data1" Width="718.2" Height="519.75">
+      <TableObject Name="DataTable" Left="9.45" Top="132.3" Width="718.2" Height="141.75" Border.Lines="All">
+        <TableColumn Name="Column1" Width="94.5"/>
+        <TableColumn Name="Column2" Width="47.25"/>
+        <TableColumn Name="Column3" Width="75.6"/>
+        <TableColumn Name="Column4" Width="56.7"/>
+        <TableColumn Name="Column5" Width="85.05"/>
+        <TableColumn Name="Column6" Width="85.05"/>
+        <TableColumn Name="Column7" Width="85.05"/>
+        <TableColumn Name="Column8" Width="103.95"/>
+        <TableColumn Name="Column9" Width="85.05"/>
+        <TableRow Name="Row1" Height="94.5">
+          <TableCell Name="HCell1" Border.Lines="Left, Top, Bottom" Text="Вид на материала" Font="Arial, 10pt"/>
+          <TableCell Name="HCell2" Border.Lines="Top, Bottom" Text="Клас" Font="Arial, 10pt"/>
+          <TableCell Name="HCell3" Border.Lines="Top, Bottom" Text="Kоли-чество" Font="Arial, 10pt"/>
+          <TableCell Name="HCell4" Border.Lines="Top, Bottom" Text="Ед. Мярка" Font="Arial, 10pt"/>
+          <TableCell Name="HCell5" Border.Lines="Top, Bottom" Text="Час на приготвяне" Font="Arial, 10pt"/>
+          <TableCell Name="HCell6" Border.Lines="Top, Bottom" Text="Час на експедиция" Font="Arial, 10pt"/>
+          <TableCell Name="HCell7" Border.Lines="Top, Bottom" Text="Час на пристигане" Font="Arial, 10pt"/>
+          <TableCell Name="HCell8" Border.Lines="Top, Bottom" Text="Час на разтоварване" Font="Arial, 10pt"/>
+          <TableCell Name="HCell9" Border.Lines="Top, Bottom" Text="Добавена вода на обекта по желание на клиента" Font="Arial, 10pt"/>
+        </TableRow>
+        <TableRow Name="Row3" Height="47.25">
+          <TableCell Name="DCell1" Text="[ProductParam]" Font="Arial, 12pt"/>
+          <TableCell Name="DCell2" Font="Arial, 10pt"/>
+          <TableCell Name="DCell3" Text="[QtyParam]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="." Format.GroupSeparator=" " Format.NegativePattern="1" Font="Arial, 12pt, style=Bold"/>
+          <TableCell Name="DCell4" Text="м3" Font="Arial, 12pt, style=Bold"/>
+          <TableCell Name="DCell5" Text="[DateTime.Now]" Format="Time" Format.Format="T" Font="Arial, 12pt"/>
+          <TableCell Name="DCell6" Text="[DateTime.Now]" Format="Time" Format.Format="T" Font="Arial, 12pt"/>
+          <TableCell Name="DCell7" Font="Arial, 10pt"/>
+          <TableCell Name="DCell8" Font="Arial, 10pt"/>
+          <TableCell Name="DCell9" Font="Arial, 10pt">
+            <CheckBoxObject Name="CheckBox1" Left="28.35" Top="18.9" Width="18.9" Height="18.9" Expression="[AddedWaterParam]"/>
+          </TableCell>
+        </TableRow>
+      </TableObject>
+      <TextObject Name="VehicleNoLbl" Left="18.9" Top="283.5" Width="264.6" Height="18.9" Text="Материала е изпратен с кола N:" Font="Arial, 11.25pt"/>
+      <TextObject Name="VehicleNoTxt" Left="321.3" Top="283.5" Width="359.1" Height="18.9" Text="[VehicleNoParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="SenderSignLbl" Left="18.9" Top="311.85" Width="151.2" Height="18.9" Text="Изпратил:....................." Font="Arial, 10pt"/>
+      <TextObject Name="DriverSignLbl" Left="170.1" Top="311.85" Width="141.75" Height="18.9" Text="Шофьор:.................." Font="Arial, 10pt"/>
+      <TextObject Name="DriverNameTxt" Left="321.3" Top="311.85" Width="349.65" Height="18.9" Text="[DriverNameParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="ReceiverSgnLbl" Left="18.9" Top="340.2" Width="510.3" Height="18.9" Text="Получил:................../.............................................................................................../" Font="Arial, 10pt"/>
+      <TextObject Name="DescriptionLbl" Left="103.95" Top="359.1" Width="151.2" Height="18.9" Text="подпис/ имена на клиента" Font="Arial, 8pt"/>
+      <TextObject Name="TermsAndConditionsLbl" Left="9.45" Top="378" Width="689.85" Height="94.5" Text="Добавяне на вода и хим. добавки на обекта се допуска само след подпис върху експедиционната бележка на лицето наредило добавянето.Полагането на бетона трябва да стане до 120 мин. след приготвянето му. При полагане задължително да се ползва вибратор и кофражът да е намазан с кофражно масло.Когато температурата на въздуха е над 25-30 градуса по Целзий или при дъждовно време, непосредствено след полагането на бетона, откритите повърхности се покриват с брезент, платна или фолио в продължение на 7 до 12 часа, за да се предпазят от атмосферни условия, водещи до бързо изсъхване. Поливането на бетона може да започне, след като повърхностния слой е с якост позволяваща стъпването върху него. Арматурата и кофража преди бетониране трябва да да бъдат предпазени от заледяване.При температура на въздуха под 5 градуса по Целзий, положения бетон да не се навлажнява.Използването на хим. добавка не освобождава строителя от грижа за запазването топлината на бетона. При неспазване на тези указания производителя не носи отговорност за качеството на положения на обект бетон(строителен разтвор)." Font="Arial, 6.75pt"/>
+      <TextObject Name="SafetyLbl" Left="9.45" Top="472.5" Width="661.5" Height="37.8" Text="Мерки за безопасност&#13;&#10;Да се вземат предпазни мерки за избягване попадане на сместа в очите, устата и носа.При допир на сместа с кожата е необходимо незабавно измиване с вода.Ако сместа попадне в окото, незабавно измийте обилно с вода и потърсете лекарска помощ." Font="Arial, 6.75pt"/>
+      <TextObject Name="ReceiptLbl" Left="9.45" Top="103.95" Width="103.95" Height="18.9" Text="Рецепта N:" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="ReceiptNumTxt" Left="113.4" Top="103.95" Width="132.3" Height="18.9" Text="[ReceiptNumParam]" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="ReceiptCodeParam" Left="245.7" Top="103.95" Width="378" Height="18.9" Text="[ReceiptCodeParam]" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="SupplierLbl" Left="9.45" Top="85.05" Width="85.05" Height="18.9" Text="Доставчик:" Font="Arial, 10pt"/>
+      <TextObject Name="SupplierNameLbl" Left="94.5" Top="85.05" Width="245.7" Height="18.9" Text="КИСОВ ТРАНС МИКС ЕООД" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="ClientLbl" Left="9.45" Top="66.15" Width="264.6" Height="18.9" Text="Получател: Строителен обект/клиент/:" Font="Arial, 10pt"/>
+      <TextObject Name="ClientParamTxt" Left="274.05" Top="66.15" Width="330.75" Height="18.9" Text="[ClientParam]" Font="Arial, 9.75pt, style=Bold"/>
+      <TextObject Name="SenderLbl" Left="9.45" Top="37.8" Width="94.5" Height="18.9" Text="Отправител: " Font="Arial, 10pt"/>
+      <TextObject Name="SenderNameLbl" Left="103.95" Top="37.8" Width="283.5" Height="18.9" Text="Бетонов център &quot;Кисов транс микс&quot;" Font="Arial, 9.75pt, style=Bold"/>
+      <TextObject Name="PhoneNumLbl" Left="434.7" Top="37.8" Width="103.95" Height="18.9" Text="0899802345" Font="Arial, 11pt, style=Bold"/>
+      <TextObject Name="PhoneLbl" Left="387.45" Top="37.8" Width="47.25" Height="18.9" Text="Тел.: " Font="Arial, 10pt"/>
+      <TextObject Name="CaptionLbl" Left="9.45" Top="9.45" Width="255.15" Height="18.9" Text="Експедиционна бележка N:" Font="Arial, 13pt, style=Bold"/>
+      <TextObject Name="NoteTxt" Left="264.6" Top="9.45" Width="103.95" Height="18.9" Text="[NoteNumberParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="DateTxt" Left="378" Top="9.45" Width="226.8" Height="18.9" Text="[NoteDateParam]" Font="Arial, 12pt, style=Bold"/>
+    </DataBand>
+    <DataBand Name="Data2" Top="523.75" Width="718.2" Height="500.85">
+      <TableObject Name="Table1" Left="9.45" Top="122.85" Width="718.2" Height="141.75" Border.Lines="All">
+        <TableColumn Name="Column10" Width="94.5"/>
+        <TableColumn Name="Column11" Width="47.25"/>
+        <TableColumn Name="Column12" Width="75.6"/>
+        <TableColumn Name="Column13" Width="56.7"/>
+        <TableColumn Name="Column14" Width="85.05"/>
+        <TableColumn Name="Column15" Width="85.05"/>
+        <TableColumn Name="Column16" Width="85.05"/>
+        <TableColumn Name="Column17" Width="103.95"/>
+        <TableColumn Name="Column18" Width="85.05"/>
+        <TableRow Name="Row4" Height="94.5">
+          <TableCell Name="Cell1" Border.Lines="Left, Top, Bottom" Text="Вид на материала" Font="Arial, 10pt"/>
+          <TableCell Name="Cell2" Border.Lines="Top, Bottom" Text="Клас" Font="Arial, 10pt"/>
+          <TableCell Name="Cell3" Border.Lines="Top, Bottom" Text="Kоли-чество" Font="Arial, 10pt"/>
+          <TableCell Name="Cell4" Border.Lines="Top, Bottom" Text="Ед. Мярка" Font="Arial, 10pt"/>
+          <TableCell Name="Cell5" Border.Lines="Top, Bottom" Text="Час на приготвяне" Font="Arial, 10pt"/>
+          <TableCell Name="Cell6" Border.Lines="Top, Bottom" Text="Час на експедиция" Font="Arial, 10pt"/>
+          <TableCell Name="Cell7" Border.Lines="Top, Bottom" Text="Час на пристигане" Font="Arial, 10pt"/>
+          <TableCell Name="Cell8" Border.Lines="Top, Bottom" Text="Час на разтоварване" Font="Arial, 10pt"/>
+          <TableCell Name="Cell9" Border.Lines="Top, Bottom" Text="Добавена вода на обекта по желание на клиента" Font="Arial, 10pt"/>
+        </TableRow>
+        <TableRow Name="Row5" Height="47.25">
+          <TableCell Name="Cell10" Text="[ProductParam]" Font="Arial, 12pt"/>
+          <TableCell Name="Cell11" Font="Arial, 10pt"/>
+          <TableCell Name="Cell12" Text="[QtyParam]" Format="Number" Format.UseLocale="false" Format.DecimalDigits="2" Format.DecimalSeparator="." Format.GroupSeparator=" " Format.NegativePattern="1" Font="Arial, 12pt, style=Bold"/>
+          <TableCell Name="Cell13" Text="м3" Font="Arial, 12pt, style=Bold"/>
+          <TableCell Name="Cell14" Text="[DateTime.Now]" Format="Time" Format.Format="T" Font="Arial, 12pt"/>
+          <TableCell Name="Cell15" Text="[DateTime.Now]" Format="Time" Format.Format="T" Font="Arial, 12pt"/>
+          <TableCell Name="Cell16" Font="Arial, 10pt"/>
+          <TableCell Name="Cell17" Font="Arial, 10pt"/>
+          <TableCell Name="Cell18" Font="Arial, 10pt">
+            <CheckBoxObject Name="CheckBox2" Left="28.35" Top="18.9" Width="18.9" Height="18.9" Expression="[AddedWaterParam]"/>
+          </TableCell>
+        </TableRow>
+      </TableObject>
+      <TextObject Name="Text1" Left="18.9" Top="274.05" Width="264.6" Height="18.9" Text="Материала е изпратен с кола N:" Font="Arial, 11.25pt"/>
+      <TextObject Name="Text2" Left="321.3" Top="274.05" Width="359.1" Height="18.9" Text="[VehicleNoParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="Text3" Left="18.9" Top="302.4" Width="151.2" Height="18.9" Text="Изпратил:....................." Font="Arial, 10pt"/>
+      <TextObject Name="Text4" Left="170.1" Top="302.4" Width="141.75" Height="18.9" Text="Шофьор:.................." Font="Arial, 10pt"/>
+      <TextObject Name="Text5" Left="321.3" Top="302.4" Width="349.65" Height="18.9" Text="[DriverNameParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="Text6" Left="18.9" Top="330.75" Width="510.3" Height="18.9" Text="Получил:................../.............................................................................................../" Font="Arial, 10pt"/>
+      <TextObject Name="Text7" Left="103.95" Top="349.65" Width="151.2" Height="18.9" Text="подпис/ имена на клиента" Font="Arial, 8pt"/>
+      <TextObject Name="Text8" Left="9.45" Top="368.55" Width="689.85" Height="94.5" Text="Добавяне на вода и хим. добавки на обекта се допуска само след подпис върху експедиционната бележка на лицето наредило добавянето.Полагането на бетона трябва да стане до 120 мин. след приготвянето му. При полагане задължително да се ползва вибратор и кофражът да е намазан с кофражно масло.Когато температурата на въздуха е над 25-30 градуса по Целзий или при дъждовно време, непосредствено след полагането на бетона, откритите повърхности се покриват с брезент, платна или фолио в продължение на 7 до 12 часа, за да се предпазят от атмосферни условия, водещи до бързо изсъхване. Поливането на бетона може да започне, след като повърхностния слой е с якост позволяваща стъпването върху него. Арматурата и кофража преди бетониране трябва да да бъдат предпазени от заледяване.При температура на въздуха под 5 градуса по Целзий, положения бетон да не се навлажнява.Използването на хим. добавка не освобождава строителя от грижа за запазването топлината на бетона. При неспазване на тези указания производителя не носи отговорност за качеството на положения на обект бетон(строителен разтвор)." Font="Arial, 6.75pt"/>
+      <TextObject Name="Text10" Left="9.45" Top="94.5" Width="103.95" Height="18.9" Text="Рецепта N:" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="Text11" Left="113.4" Top="94.5" Width="132.3" Height="18.9" Text="[ReceiptNumParam]" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="Text12" Left="245.7" Top="94.5" Width="378" Height="18.9" Text="[ReceiptCodeParam]" Font="Arial, 11.25pt, style=Bold"/>
+      <TextObject Name="Text13" Left="9.45" Top="75.6" Width="85.05" Height="18.9" Text="Доставчик:" Font="Arial, 10pt"/>
+      <TextObject Name="Text14" Left="94.5" Top="75.6" Width="245.7" Height="18.9" Text="КИСОВ ТРАНС МИКС ЕООД" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="Text15" Left="9.45" Top="56.7" Width="264.6" Height="18.9" Text="Получател: Строителен обект/клиент/:" Font="Arial, 10pt"/>
+      <TextObject Name="Text16" Left="274.05" Top="56.7" Width="330.75" Height="18.9" Text="[ClientParam]" Font="Arial, 9.75pt, style=Bold"/>
+      <TextObject Name="Text17" Left="9.45" Top="28.35" Width="94.5" Height="18.9" Text="Отправител: " Font="Arial, 10pt"/>
+      <TextObject Name="Text18" Left="103.95" Top="28.35" Width="283.5" Height="18.9" Text="Бетонов център &quot;Кисов транс микс&quot;" Font="Arial, 9.75pt, style=Bold"/>
+      <TextObject Name="Text19" Left="434.7" Top="28.35" Width="103.95" Height="18.9" Text="0899802345" Font="Arial, 11pt, style=Bold"/>
+      <TextObject Name="Text20" Left="387.45" Top="28.35" Width="47.25" Height="18.9" Text="Тел.: " Font="Arial, 10pt"/>
+      <TextObject Name="Text21" Left="9.45" Width="255.15" Height="18.9" Text="Експедиционна бележка N:" Font="Arial, 13pt, style=Bold"/>
+      <TextObject Name="Text22" Left="264.6" Width="103.95" Height="18.9" Text="[NoteNumberParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="Text23" Left="378" Width="226.8" Height="18.9" Text="[NoteDateParam]" Font="Arial, 12pt, style=Bold"/>
+      <TextObject Name="Text9" Left="9.45" Top="463.05" Width="661.5" Height="37.8" Text="Мерки за безопасност&#13;&#10;Да се вземат предпазни мерки за избягване попадане на сместа в очите, устата и носа.При допир на сместа с кожата е необходимо незабавно измиване с вода.Ако сместа попадне в окото, незабавно измийте обилно с вода и потърсете лекарска помощ." Font="Arial, 6.75pt"/>
+    </DataBand>
+  </ReportPage>
+</Report>

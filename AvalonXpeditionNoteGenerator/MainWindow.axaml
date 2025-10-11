@@ -1,0 +1,352 @@
+
+    
+    <!-- MainWindow.axaml -->
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:AvalonXpeditionNoteGenerator.Models"
+        xmlns:con="using:AvalonXpeditionNoteGenerator.Constants"
+        xmlns:li="using:LoadingIndicators.Avalonia"
+        x:Class="AvalonXpeditionNoteGenerator.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="КисовТрансМикс-SpeditionNotePrinter v1.0"
+        Width="900" Height="600">
+    
+   <Window.Styles>
+        <!-- Sidebar button styling -->
+        <Style Selector="Button.menu-button">
+            <Setter Property="Background" Value="#2C3E50" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="20,15" />
+            <Setter Property="Margin" Value="10,5" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        
+        <Style Selector="Button.menu-button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0078D4" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        
+        <Style Selector="Button.menu-button.active">
+            <Setter Property="Background" Value="#3498DB" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        
+        <Style Selector="Button.menu-button.active:pointerover">
+            <Setter Property="Background" Value="#5DADE2" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        
+        <!-- Form controls styling -->
+        <Style Selector="TextBlock.label">
+            <Setter Property="Margin" Value="0,10,0,5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        
+        <Style Selector="TextBox, ComboBox">
+            <Setter Property="Margin" Value="0,0,0,15" />
+            <Setter Property="Padding" Value="8" />
+        </Style>
+        
+        <Style Selector="Button.action-button">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="Background" Value="#0078D4" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        
+        <Style Selector="Button.action-button:pointerover">
+            <Setter Property="Background" Value="#106EBE" />
+        </Style>
+    </Window.Styles>
+    
+    <!-- Main Grid with 2 columns: Sidebar + Content -->
+    <Grid ColumnDefinitions="210,*">
+        
+        <!-- Left Sidebar with vertical menu -->
+        <Border Grid.Column="0" 
+                Background="#2C3E50"
+                BorderBrush="#1A252F" 
+                BorderThickness="0,0,1,0">
+            <Grid>
+            <StackPanel Margin="0,20,0,0">
+                <TextBlock Text="Команди" 
+                           Foreground="White" 
+                           FontSize="16" 
+                           FontWeight="Bold"
+                           Margin="20,0,0,20" />
+                
+                <Button Classes="menu-button active" 
+                        Name="BtnPrinting"
+                        Content="Принтиране"
+                        Click="OnPrintNavClick" />
+                
+                <Button Classes="menu-button" 
+                        Name="BtnCapturing"
+                        Content="Редактиране"
+                        Click="OnCaptureNavClick" />
+            </StackPanel>
+            <TextBlock VerticalAlignment="Bottom"
+                       HorizontalAlignment="Left"
+                       Text="Powered by DL Support 2025" 
+                       Foreground="White" 
+                       FontSize="14" 
+                       Padding="7, 10">
+            </TextBlock>
+            </Grid>
+        </Border>
+        
+        <!-- Right Content Area -->
+        
+        <Border Grid.Column="1" 
+                Background="#F5F5F5"
+                Padding="30"
+                IsVisible= "{Binding !IsLoading}">
+            
+            <!-- Content panel that switches between views -->
+            <Panel>
+                
+                <!-- Print Invoice View -->
+                <ScrollViewer Name="PrintNoteView" IsVisible="True">
+                    <StackPanel MaxWidth="600">
+                        <TextBlock Text="{Binding PrintableExpeditionNote.NoteCaption}"
+                                   FontSize="24" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,20" />
+                        
+                        <TextBlock Text="Номер по ред / (дата, час):" Classes="label" />
+                        <StackPanel Orientation="Horizontal" Spacing="20">
+                            <TextBox Name="TxtNoteNumber" IsReadOnly="True"
+                                     Text="{Binding PrintableExpeditionNote.NoteNumber}" />
+                            <TextBlock Text="{Binding PrintableExpeditionNote.NoteDate}"
+                                       FontSize="15" 
+                                       FontWeight="Bold" Padding="0,10,0,0"/>
+                        </StackPanel>
+                        
+                        
+                        <!-- Client Name -->
+                        <TextBlock Text="Строителен обект/клиент:" Classes="label" />
+                        <TextBox Name="TxtClientName" 
+                                 Text="{Binding PrintableExpeditionNote.Client}"
+                                 Watermark="Получател"/>
+                        
+                        <!-- Receipt Type -->
+                        <TextBlock   Text="Рецепта N:" Classes="label" />
+                        <ComboBox  Name="CmbReceiptType"  
+                                  MinWidth="180"
+                                  MaxHeight="25"
+                                  Margin="0,0,0,0"
+                                  VerticalAlignment="Center"
+                                  VerticalContentAlignment="Center"
+                                  ItemsSource="{Binding Receipts}"
+                                  SelectedItem="{Binding PrintableExpeditionNote.SelectedReceipt}"
+                                  DisplayMemberBinding="{Binding FullDescription}">
+                           
+                        </ComboBox>
+                        
+                        <Grid Name="ReceiptDetailGrid" ColumnDefinitions="240,Auto,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="20" 
+                              Margin="0,10,0,0">
+                            <!-- Receipt Type -->
+                            <TextBlock Grid.Row="0" Grid.Column="0"  Text="Вид на Материала:" Classes="label" />
+                            <ComboBox Grid.Row="1" Grid.Column="0" Name="CmbMaterialType"  
+                                      MinWidth="180"
+                                      MaxHeight="25"
+                                      Margin="0,0,0,0"
+                                      VerticalAlignment="Center"
+                                      VerticalContentAlignment="Center"
+                                      ItemsSource="{Binding Materials}"
+                                      SelectedItem="{Binding PrintableExpeditionNote.SelectedMaterial}"
+                                      DisplayMemberBinding="{Binding MaterialDescription}">
+                           
+                            </ComboBox>
+                            <!-- Quantity -->
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Количество(куб.м.):" Classes="label"/>
+                            <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding PrintableExpeditionNote.Quantity}"
+                                           MinWidth="180"
+                                           MaxHeight="25"
+                                           VerticalAlignment="Center"
+                                           VerticalContentAlignment="Center"
+                                           FormatString="F2"
+                                           
+                                           Minimum="0.10"
+                                           Maximum="100000"
+                                           Increment="0.5"
+                                           Name="QuantityNumericUpDown"
+                                           KeyUp="OnNumericUpDownKeyUp"/>
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Добавяне вода:" Classes="label" />
+                            <CheckBox Grid.Row="1" Grid.Column="2"   VerticalAlignment="Center" VerticalContentAlignment="Center" Name="CheckWater" IsChecked="{Binding PrintableExpeditionNote.AddedWater}"></CheckBox>
+                        </Grid>
+                        
+                        
+                        <Grid Name="SpeditionDetailGrid" ColumnDefinitions="240,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="20" 
+                              Margin="0,10,0,0">
+                        <!-- Truck -->
+                        <TextBlock Grid.Row="0" Grid.Column="0"  Text="Изпратен с кола N:" Classes="label" />
+                        <ComboBox Grid.Row="1" Grid.Column="0"  Name="CmbTruck"
+                                  
+                                  ItemsSource="{Binding Trucks}"
+                                  SelectedItem="{Binding PrintableExpeditionNote.SelectedTruck}"
+                                  DisplayMemberBinding="{Binding TruckDescription}">
+                            
+                        </ComboBox>
+                        
+                        <!-- Truck -->
+                        <TextBlock Grid.Row="0" Grid.Column="1"  Text="Шофьор:" Classes="label" />
+                        <ComboBox Grid.Row="1" Grid.Column="1"  Name="CmbDriver"
+                                  ItemsSource="{Binding Drivers}"
+                                  SelectedItem="{Binding PrintableExpeditionNote.SelectedDriver}"
+                                  DisplayMemberBinding="{Binding DriverName}">
+                            
+                        </ComboBox>
+                        </Grid>
+                        <!-- Action Buttons -->
+                        <StackPanel Orientation="Horizontal" 
+                                    HorizontalAlignment="Right"
+                                    Margin="0,20,0,0">
+                            <Button Classes="action-button" 
+                                    Content="Преглед"
+                                    Click="OnPrintPreviewClick" />
+                            <Button Classes="action-button" 
+                                    Content="Печат"
+                                    Click="OnPrintClick" />
+                            <Button Classes="action-button" 
+                                    Content="Нов Документ"
+                                    Click="OnNewDocument" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+                
+                <!-- Capture Note View -->
+                <ScrollViewer Name="CaptureNewDetailView" IsVisible="False">
+                    <StackPanel MaxWidth="500">
+                        <TextBlock Text="Добавяне на данни" 
+                                   FontSize="24" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,20" />
+                        
+                        <!-- Section: New Receipt -->
+                        <Border Background="White" 
+                                Padding="20" 
+                                CornerRadius="8"
+                                Margin="0,0,0,20"
+                                BoxShadow="0 2 8 0 #10000000">
+                            <StackPanel>
+                                <TextBlock Text="Нова Рецепта" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,15" />
+                                
+                                <TextBlock Text="Рецепта N:" Classes="label" />
+                                <TextBox Name="TxtNewReceiptName" 
+                                         Text="{Binding EntityToAdd.ReceiptCode}"
+                                         
+                                         Watermark="Код на рецепта" />
+                                
+                                
+                                <Button Classes="action-button" 
+                                        Content="Добави Рецепта"
+                                        HorizontalAlignment="Right"
+                                        Click="OnAddReceiptClick" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Section: New Material -->
+                        <Border Background="White" 
+                                Padding="20" 
+                                CornerRadius="8"
+                                BoxShadow="0 2 8 0 #10000000">
+                            <StackPanel>
+                                <TextBlock Text="Нов Материал" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,15" />
+                                
+                                <TextBlock Text="Вид на материала:" Classes="label" />
+                                <TextBox Name="TxtNewMaterialName" 
+                                         Text="{Binding EntityToAdd.MaterialCode}"
+                                         Watermark="Описание на материала" />
+                                
+                                <Button Classes="action-button" 
+                                        Content="Добави материал"
+                                        HorizontalAlignment="Right"
+                                        Click="OnAddMaterialClick" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Section: New Driver -->
+                        <Border Background="White" 
+                                Padding="20" 
+                                CornerRadius="8"
+                                Margin="0,0,0,20"
+                                BoxShadow="0 2 8 0 #10000000">
+                            <StackPanel>
+                                <TextBlock Text="Нов шофьор" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,15" />
+                                
+                                <TextBlock Text="Шофьор:" Classes="label" />
+                                <TextBox Name="ТxtNewDriverName" 
+                                         Text="{Binding EntityToAdd.DriverName}"
+                                         Watermark="Име и фамилия на шофьор" />
+                                
+                                <Button Classes="action-button" 
+                                        Content="Добави шофьор"
+                                        HorizontalAlignment="Right"
+                                        Click="OnAddDriverClick" />
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Section: New Truck -->
+                        <Border Background="White" 
+                                Padding="20" 
+                                CornerRadius="8"
+                                BoxShadow="0 2 8 0 #10000000">
+                            <StackPanel>
+                                <TextBlock Text="Нова техника" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,15" />
+                                
+                                <TextBlock Text="Предназначение/клас:" Classes="label" />
+                                <TextBox Name="ТxtNewTruckClass" 
+                                         Text="{Binding EntityToAdd.TruckClass}"
+                                         Watermark="Описание на техниката" />
+                                
+                                <TextBlock Text="Регистрация:" Classes="label" />
+                                <TextBox Name="TxtNewTruckRegNo" 
+                                         Text="{Binding EntityToAdd.TruckRegNumber}"
+                                         Watermark="Регистрационен N" />
+                                
+                                <Button Classes="action-button" 
+                                        Content="Добави"
+                                        HorizontalAlignment="Right"
+                                        Click="OnAddTruckClick" />
+                            </StackPanel>
+                        </Border>
+                        
+                    </StackPanel>
+                    
+                </ScrollViewer>
+                
+            </Panel>
+            
+        </Border>
+        <Border Grid.Column="1" 
+                Background="#F5F5F5"
+                IsVisible="{Binding IsLoading}"
+                ZIndex="9999">
+            <StackPanel HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        Spacing="10">
+                <li:LoadingIndicator IsActive="{Binding IsLoading}" Mode="ThreeDots" SpeedRatio="0.7" />
+            </StackPanel>
+        </Border>
+        
+    </Grid>
+    
+</Window>
