@@ -8,7 +8,7 @@
         xmlns:li="using:LoadingIndicators.Avalonia"
         x:Class="AvalonXpeditionNoteGenerator.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="КисовТрансМикс-SpeditionNotePrinter v1.0"
+        Title="КисовТрансМикс-SpeditionNotePrinter v1.1"
         Width="900" Height="600">
     
    <Window.Styles>

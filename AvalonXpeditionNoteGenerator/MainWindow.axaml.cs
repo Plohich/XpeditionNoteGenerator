@@ -27,13 +27,29 @@ public partial class MainWindow : Window
             
             Loaded += async (sender, e) =>
             {
-                this.DataContext = await LoadData();
+                DataContext = await LoadData();
             };
             
+            Closing += OnWindowClosing;
+        }
+        
+        private async Task<MainWindowViewModel> LoadData() => await MainWindowViewModel.LoadData();
+
+        private async Task<bool> InsertNewNoteNumber()
+        {
+            if (DataContext is MainWindowViewModel
+                {
+                    PrintableExpeditionNote:
+                    {
+                        PdfDocumentPath : { } pdp
+                    }
+                } vm && !string.IsNullOrEmpty(pdp))
+            {
+               return await vm.SaveEntity(ModelTypeEnum.SpeditionNote);
+            }
+            return false;
         }
 
-        private async Task<MainWindowViewModel> LoadData() => await MainWindowViewModel.LoadData();
-        
         // Menu Navigation
         private void OnPrintNavClick(object sender, RoutedEventArgs e)
         {
@@ -86,8 +102,6 @@ public partial class MainWindow : Window
                             FileName = model.PrintableExpeditionNote.PdfDocumentPath,
                             UseShellExecute = true
                         });
-
-                        await model.SaveEntity(ModelTypeEnum.SpeditionNote);
                     }
 
                     // Process.Start(new ProcessStartInfo
@@ -152,7 +166,6 @@ public partial class MainWindow : Window
                         
                         if (result)
                         {
-                            await model.SaveEntity(ModelTypeEnum.SpeditionNote);
                             model.IsLoading = false;
                             
                             Process.Start(new ProcessStartInfo
@@ -183,7 +196,9 @@ public partial class MainWindow : Window
         {
             try
             {
-                DataContext = await LoadData();;
+                await InsertNewNoteNumber();
+                
+                DataContext = await LoadData();
             }
             catch (Exception exception)
             {
@@ -314,5 +329,27 @@ public partial class MainWindow : Window
             {
                 CheckWater.Focus();
             }
+        }
+        
+        private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+        {
+            try
+            {
+                // Cancel closing temporarily
+                e.Cancel = true;
+            
+                await InsertNewNoteNumber();
+              
+            }
+            catch (Exception exception)
+            {
+                ShowMessage(SystemError, exception.Message);
+            }
+            finally
+            {
+                Closing -= OnWindowClosing;
+                Close();
+            }
+            
         }
 }
