@@ -8,7 +8,7 @@
         xmlns:li="using:LoadingIndicators.Avalonia"
         x:Class="AvalonXpeditionNoteGenerator.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="КисовТрансМикс-SpeditionNotePrinter v1.1"
+        Title="КисовТрансМикс-SpeditionNotePrinter v2.0"
         Width="900" Height="600">
     
    <Window.Styles>
@@ -92,7 +92,7 @@
             </StackPanel>
             <TextBlock VerticalAlignment="Bottom"
                        HorizontalAlignment="Left"
-                       Text="Powered by DL Support 2025" 
+                       Text="Powered by DL Support 2026" 
                        Foreground="White" 
                        FontSize="14" 
                        Padding="7, 10">

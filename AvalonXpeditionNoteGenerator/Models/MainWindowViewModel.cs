@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using FastReport;
 using FastReport.Export.PdfSimple;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 namespace AvalonXpeditionNoteGenerator.Models;
 
@@ -20,8 +21,7 @@ public partial class MainWindowViewModel : ObservableObject
     
     // Using ObservableCollection is better for granular updates, when MainViewModel could have too big sub-collections(could cause UI issues)
     // But for now will stick to complete update of ViewModel, once some entity has been added just reload whole model
-    private ObservableCollection<ReceiptType> _receiptTypes = new();
-    public ObservableCollection<ReceiptType> Receipts 
+    public ObservableCollection<ReceiptType> Receipts
     {
         get;
         private set => SetProperty(ref field, value);
@@ -44,6 +44,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private  MainWindowViewModel(ILogger logger, List<ReceiptType> receipts,  List<Truck> trucks, List<DriverType> drivers, List<MaterialType> materials, int initialNoteNumber)
     {
+        modelLogger = logger;
         Receipts = new (receipts);
         Trucks = trucks;
         Drivers = drivers;
