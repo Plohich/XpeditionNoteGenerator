@@ -1,17 +1,20 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 
 namespace AvalonXpeditionNoteGenerator.Models;
 
 public class ReceiptType 
 {
+    // By convention, a property named Id or <type name>Id will be configured as the primary key of an entity.
     public int Id
     {
-        get; set;
+        get; init;
     }
-
+    
+    [Column(TypeName = "nvarchar(200)")]
     public string Description
     {
-        get; set;
+        get; init;
     } = string.Empty;
     public static ReceiptType Create(int id, string description) => new ()
     {

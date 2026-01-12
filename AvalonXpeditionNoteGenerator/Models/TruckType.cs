@@ -1,20 +1,24 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace AvalonXpeditionNoteGenerator.Models;
 
 public class Truck
 {
     public int Id
     {
-        get; set;
+        get; init;
     }
-
+    
+    [Column(TypeName = "nvarchar(150)")]
     public string TruckType
     {
-        get; set;
+        get; init;
     } = string.Empty;
-
+    
+    [Column(TypeName = "nvarchar(10)")]
     public string TruckRegNo
     {
-        get; set;
+        get; init;
     } = string.Empty;
     public static Truck Create(int id, string truckType, string truckRegNo) => new ()
     {
