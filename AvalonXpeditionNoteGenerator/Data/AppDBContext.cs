@@ -54,12 +54,19 @@ public class AppDbContext : DbContext
         );
         modelBuilder.Entity<GeneratedPdfDocument>().HasData(
             GeneratedPdfDocument.Create(App.Settings.InitialNoteNumber, "InitialSpeditionNote"));
+
+        modelBuilder.Entity<ClientType>(cl =>
+        {
+            cl.HasKey(x => x.Id);
+        });
     }
     
     public DbSet<DriverType> Drivers { get; set; }
     public DbSet<MaterialType> Materials { get; set; }
     public DbSet<ReceiptType> Receipts { get; set; }
     public DbSet<Truck> Trucks { get; set; }
+    
+    public DbSet<ClientType> Clients { get; set; }
     
     public DbSet<GeneratedPdfDocument> PdfDocuments { get; set; }
 }

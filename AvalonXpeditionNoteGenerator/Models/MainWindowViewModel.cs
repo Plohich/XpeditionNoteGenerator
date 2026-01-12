@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AvalonXpeditionNoteGenerator.Config;
 using AvalonXpeditionNoteGenerator.Data;
@@ -20,10 +21,10 @@ public partial class MainWindowViewModel : ObservableObject
     private ObservableCollection<ReceiptType> _receiptTypes = new();
     public ObservableCollection<ReceiptType> Receipts 
     {
-        get => _receiptTypes;
-        private set => SetProperty(ref _receiptTypes, value);
+        get;
+        private set => SetProperty(ref field, value);
     }
-
+    
     public List<Truck> Trucks { get; init; } 
 
     public List<DriverType> Drivers { get; init; } 
@@ -49,7 +50,6 @@ public partial class MainWindowViewModel : ObservableObject
         EntityToAdd = NewEntity.Create();
         
         SpeditionNoteReport.Load(AppConfig.ReportTemplatePath);
-
     }
     
     public static  async Task<MainWindowViewModel> LoadData()
@@ -68,7 +68,7 @@ public partial class MainWindowViewModel : ObservableObject
             
     }
 
-    public async Task<bool> RefreshDataSource()
+    public async Task<bool> RefreshReceiptDataSource()
     {
         bool result;
         try
@@ -86,6 +86,44 @@ public partial class MainWindowViewModel : ObservableObject
         }
 
         return result;
+    }
+    
+    public static async Task<IEnumerable<string>> GetClientsDataSource(string term, CancellationToken cncToken)
+    {
+        try
+        {
+            await using var db = new AppDbContext(AppConfig.DatabasePath);
+            // var temp = await db.Clients
+            //     .Where(c => EF.Functions.Like(c.ClientName, $"%{term}%"))
+            //     .Select(c => c.ClientName)
+            //     .Take(10)
+            //     .ToListAsync(cncToken);
+            // var temp = await db.Clients
+            //     .AsNoTracking()
+            //     .Where(p => EF.Functions.Collate(p.ClientName, "NOCASE") // Use the custom name you registered
+            //         .Contains(term))
+            //     .Select(p => p.ClientName)
+            //     .OrderBy(p => p)
+            //     .Take(10)
+            //     .ToListAsync(cncToken);
+
+            var temp = await db.Clients
+                .AsNoTracking()
+                .Select(c => c.ClientName)
+                .ToListAsync(cncToken);
+            return temp.Where(client => client.Contains(term, StringComparison.InvariantCultureIgnoreCase))
+                .OrderBy(client => client)
+                .Take(15);
+        }
+        catch (OperationCanceledException)
+        {
+            return Enumerable.Empty<string>();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error while getting clients data source.");
+            return Enumerable.Empty<string>();
+        }
     }
 
     public async Task<bool> PrepareReport()
@@ -141,6 +179,7 @@ public partial class MainWindowViewModel : ObservableObject
                 }),
                 
                 ModelTypeEnum.Receipt =>  db.Receipts.Add(ReceiptType.CreateWithDescription(EntityToAdd.ReceiptCode)),
+                ModelTypeEnum.Client => db.Clients.Add(ClientType.CreateWithName(EntityToAdd.ClientName)),
                 ModelTypeEnum.Driver => db.Drivers.Add(DriverType.CreateWithName((EntityToAdd.DriverName))),
                 ModelTypeEnum.Material => db.Materials.Add(MaterialType.CreateWithDesc(EntityToAdd.MaterialCode)),
                 ModelTypeEnum.Truck => db.Trucks.Add(Truck.CreateWithTypeAndReg(EntityToAdd.TruckClass, EntityToAdd.TruckRegNumber)),

@@ -26,83 +26,110 @@ public partial class MainWindow : Window
             InitializeComponent();
             
             Loaded += async (sender, e) =>
-            {
-                DataContext = await LoadData();
-            };
-            
-            Closing += OnWindowClosing;
-        }
-        
-        private async Task<MainWindowViewModel> LoadData() => await MainWindowViewModel.LoadData();
+    public MainWindow()
+    {
+        InitializeComponent();
 
-        private async Task<bool> InsertNewNoteNumber()
+        // Configure Serilog once at application startup
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(
+                path: "logs/app-.txt",
+                rollingInterval: RollingInterval.Day, // Creates new file each day
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+            )
+            .CreateLogger();
+
+        Loaded += async (sender, e) => { DataContext = await LoadData(); };
+
+        ClientNameAutoComplete.AsyncPopulator += async (term, token) =>
+        {
+            currentCts?.CancelAsync();
+            currentCts?.Dispose();
+            currentCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Enumerable.Empty<object>();
+            }
+
+            // Call  will be cancelled if user types again
+            var result = await MainWindowViewModel.GetClientsDataSource(term, currentCts.Token);
+
+            // AutoCompleteBox expects IEnumerable<object>
+            return result;
+        };
+
+        Closing += OnWindowClosing;
+    }
+
+    private async Task<MainWindowViewModel> LoadData() => await MainWindowViewModel.LoadData(Log.ForContext<MainWindowViewModel>());
+
+    private async Task<bool> InsertNewNoteNumber()
+    {
+        if (DataContext is MainWindowViewModel
+            {
+                PrintableExpeditionNote:
+                {
+                    PdfDocumentPath : { } pdp
+                }
+            } vm && !string.IsNullOrEmpty(pdp))
+        {
+            return await vm.SaveEntity(ModelTypeEnum.SpeditionNote);
+        }
+
+        return false;
+    }
+
+    // Menu Navigation
+    private void OnPrintNavClick(object sender, RoutedEventArgs e)
+    {
+        // Show Print Invoice view, hide Capture view
+        PrintNoteView.IsVisible = true;
+        CaptureNewDetailView.IsVisible = false;
+
+        // Update button styles
+        BtnPrinting.Classes.Add("active");
+        BtnCapturing.Classes.Remove("active");
+    }
+
+    private void OnCaptureNavClick(object sender, RoutedEventArgs e)
+    {
+        // Show Capture Invoice view, hide Print view
+        PrintNoteView.IsVisible = false;
+        CaptureNewDetailView.IsVisible = true;
+
+        // Update button styles
+        BtnCapturing.Classes.Add("active");
+        BtnPrinting.Classes.Remove("active");
+    }
+
+    private async void OnPrintPreviewClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
             if (DataContext is MainWindowViewModel
                 {
-                    PrintableExpeditionNote:
+                    PrintableExpeditionNote :
                     {
-                        PdfDocumentPath : { } pdp
+                        SelectedReceipt: { } receipt,
+                        SelectedTruck: { } truck,
+                        SelectedMaterial: { } material,
+                        SelectedDriver: { } driver,
                     }
-                } vm && !string.IsNullOrEmpty(pdp))
+                } model)
             {
-               return await vm.SaveEntity(ModelTypeEnum.SpeditionNote);
-            }
-            return false;
-        }
-
-        // Menu Navigation
-        private void OnPrintNavClick(object sender, RoutedEventArgs e)
-        {
-            // Show Print Invoice view, hide Capture view
-            PrintNoteView.IsVisible = true;
-            CaptureNewDetailView.IsVisible = false;
-            
-            // Update button styles
-            BtnPrinting.Classes.Add("active");
-            BtnCapturing.Classes.Remove("active");
-           
-        }
-        
-        private void OnCaptureNavClick(object sender, RoutedEventArgs e)
-        {
-            // Show Capture Invoice view, hide Print view
-            PrintNoteView.IsVisible = false;
-            CaptureNewDetailView.IsVisible = true;
-            
-            // Update button styles
-            BtnCapturing.Classes.Add("active");
-            BtnPrinting.Classes.Remove("active");
-        }
-        
-        private  async void OnPrintPreviewClick(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                
-                if (DataContext is MainWindowViewModel
-                    {
-                        PrintableExpeditionNote :
-                        {
-                            SelectedReceipt: { } receipt ,
-                            SelectedTruck: { }  truck ,
-                            SelectedMaterial: {}  material ,
-                            SelectedDriver: {}  driver ,
-                            
-                        } 
-                    } model)
+                var reportPrepared = await model.PrepareReport();
+                if (reportPrepared)
                 {
+                    WindowState = WindowState.Minimized;
 
-                    var reportPrepared = await model.PrepareReport();
-                    if (reportPrepared)
+                    Process.Start(new ProcessStartInfo
                     {
-                        WindowState = WindowState.Minimized;
-
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = model.PrintableExpeditionNote.PdfDocumentPath,
-                            UseShellExecute = true
-                        });
-                    }
+                        FileName = model.PrintableExpeditionNote.PdfDocumentPath,
+                        UseShellExecute = true
+                    });
+                }
 
                     // Process.Start(new ProcessStartInfo
                         // {
@@ -192,39 +219,41 @@ public partial class MainWindow : Window
             }  
         }
 
-        private async void OnNewDocument(object sender, RoutedEventArgs e)
+    private async void OnNewDocument(object sender, RoutedEventArgs e)
+    {
+        try
         {
-            try
-            {
-                await InsertNewNoteNumber();
-                
-                DataContext = await LoadData();
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-            }
-              
+            await InsertNewNoteNumber();
+
+            DataContext = await LoadData();
         }
-        
-        // Capture Note View Actions
-        private async void OnAddReceiptClick(object sender, RoutedEventArgs e)
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+        }
+    }
+
+    // Capture Note View Actions
+    private async void OnAddReceiptClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
             if (DataContext is MainWindowViewModel
                 {
                     EntityToAdd:
                     {
-                        ReceiptCode: { Length: > 0  } receiptCode
+                        ReceiptCode: { Length: > 0 } receiptCode
                     } newReceipt,
                 } model && !string.IsNullOrWhiteSpace(receiptCode))
             {
-                
                 bool res = await model.SaveEntity(ModelTypeEnum.Receipt);
-               
-                ShowMessage(res ? OK : SystemError, res ? $"Рецепта '{newReceipt.ReceiptCode}' запазена успешно." : 
-                                                                      $"Рецепта '{newReceipt.ReceiptCode}' не е запазена." );
+
+                ShowMessage(res ? OK : SystemError,
+                    res
+                        ? $"Рецепта '{newReceipt.ReceiptCode}' запазена успешно."
+                        : $"Рецепта '{newReceipt.ReceiptCode}' не е запазена.");
                 newReceipt.ReceiptCode = string.Empty;
-                await model.RefreshDataSource();
+                await model.RefreshReceiptDataSource();
             }
             else
             {
@@ -232,9 +261,41 @@ public partial class MainWindow : Window
             }
         }
 
-        private async void OnAddDriverClick(object sender, RoutedEventArgs e)
+    private async void OnAddClientClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
+            if (DataContext is MainWindowViewModel
+                {
+                    EntityToAdd:
+                    {
+                        ClientName: { Length: > 0 } clientName
+                    } newClient,
+                } model && !string.IsNullOrWhiteSpace(clientName))
+            {
+                bool res = await model.SaveEntity(ModelTypeEnum.Client);
 
+                ShowMessage(res ? OK : SystemError,
+                    res
+                        ? $"Клиент/Обект '{newClient.ClientName}' запазен успешно."
+                        : $"Клиент '{newClient.ClientName}' не е запазен.");
+                newClient.ClientName = string.Empty;
+            }
+            else
+            {
+                ShowMessage(InvalidDataMessage, EnterClient);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.Message, "Error while adding client {@ex}", ex);
+        }
+    }
+
+    private async void OnAddDriverClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
             if (DataContext is MainWindowViewModel
                 {
                     EntityToAdd:
@@ -249,7 +310,7 @@ public partial class MainWindow : Window
                     res
                         ? $"Шофьор '{newDriver.DriverName}' запазен успешно."
                         : $"Шофьор '{newDriver.DriverName}' не е запазен.");
-                
+
                 newDriver.DriverName = string.Empty;
             }
             else
@@ -259,21 +320,24 @@ public partial class MainWindow : Window
         }
 
 
-        private async void OnAddMaterialClick(object sender, RoutedEventArgs e)
+    private async void OnAddMaterialClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
             if (DataContext is MainWindowViewModel
                 {
                     EntityToAdd:
                     {
-                        MaterialCode:{Length: > 0  } materialCode
+                        MaterialCode: { Length: > 0 } materialCode
                     } newMaterial,
-                }model && !string.IsNullOrWhiteSpace(materialCode))
+                } model && !string.IsNullOrWhiteSpace(materialCode))
             {
-                
                 bool res = await model.SaveEntity(ModelTypeEnum.Material);
                 DataContext = await LoadData();
-                ShowMessage(res? OK : SystemError, res ? $"Материал '{newMaterial.MaterialCode}' запазен успешно." :
-                                                                     $"Материал '{newMaterial.MaterialCode}' не е запазен.");
+                ShowMessage(res ? OK : SystemError,
+                    res
+                        ? $"Материал '{newMaterial.MaterialCode}' запазен успешно."
+                        : $"Материал '{newMaterial.MaterialCode}' не е запазен.");
             }
             else
             {
@@ -287,21 +351,23 @@ public partial class MainWindow : Window
                 {
                     EntityToAdd:
                     {
-                        TruckClass:{Length: >0  } truckClass,
-                        TruckRegNumber:{Length:> 0  } truckRegNumber
+                        TruckClass: { Length: > 0 } truckClass,
+                        TruckRegNumber: { Length: > 0 } truckRegNumber
                     } newTruck,
                 } model && !string.IsNullOrWhiteSpace(truckClass) && !string.IsNullOrWhiteSpace(truckRegNumber))
             {
-               
                 bool res = await model.SaveEntity(ModelTypeEnum.Truck);
                 DataContext = await LoadData();
-                ShowMessage(res ? OK: SystemError, res? $" {newTruck.TruckClass}, регистрация {newTruck.TruckRegNumber} запазен успешно.":
-                                                                    $" {newTruck.TruckClass}, регистрация {newTruck.TruckRegNumber} не е запазен.");
+                ShowMessage(res ? OK : SystemError,
+                    res
+                        ? $" {newTruck.TruckClass}, регистрация {newTruck.TruckRegNumber} запазен успешно."
+                        : $" {newTruck.TruckClass}, регистрация {newTruck.TruckRegNumber} не е запазен.");
             }
             else
             {
                 ShowMessage(InvalidDataMessage, EnterTruckClassAndRegNumber);
             }
+
         }
         
         // Helper method to show messages

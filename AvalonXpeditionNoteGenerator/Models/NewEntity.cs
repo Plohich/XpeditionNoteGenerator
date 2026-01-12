@@ -19,5 +19,8 @@ public partial class NewEntity : ObservableObject
     [ObservableProperty]
     private string materialCode = string.Empty;
     
+    [ObservableProperty]
+    private string clientName = string.Empty;
+    
     public static NewEntity Create() => new();
 }

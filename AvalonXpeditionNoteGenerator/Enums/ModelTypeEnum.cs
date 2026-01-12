@@ -6,5 +6,6 @@ public enum ModelTypeEnum
     Driver = 2,
     Material = 3,
     Truck = 4,
-    SpeditionNote = 5
+    SpeditionNote = 5,
+    Client = 6,
 }

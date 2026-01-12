@@ -130,9 +130,18 @@
                         
                         <!-- Client Name -->
                         <TextBlock Text="Строителен обект/клиент:" Classes="label" />
-                        <TextBox Name="TxtClientName" 
+                        <!--TextBox Name="TxtClientName" 
                                  Text="{Binding PrintableExpeditionNote.Client}"
-                                 Watermark="Получател"/>
+                                 Watermark="Получател"/-->
+                        <AutoCompleteBox Name="ClientNameAutoComplete"
+                                         
+                                         SelectedItem="{Binding PrintableExpeditionNote.Client}"
+                                         Watermark="Строителен обект"
+                                         MinimumPrefixLength="2"
+                                         MinimumPopulateDelay="0:0:0.45"
+                                         FilterMode="Contains"
+                                         HorizontalAlignment="Left"
+                                         Width="600"/>
                         
                         <!-- Receipt Type -->
                         <TextBlock   Text="Рецепта N:" Classes="label" />
@@ -228,6 +237,32 @@
                                    FontWeight="Bold"
                                    Margin="0,0,0,20" />
                         
+                        <!-- Section: New Client -->
+                        <Border Background="White" 
+                                Padding="20" 
+                                CornerRadius="8"
+                                Margin="0,0,0,20"
+                                BoxShadow="0 2 8 0 #10000000">
+                            <StackPanel>
+                                <TextBlock Text="Нов Клиент/Строителен Обект" 
+                                           FontSize="16" 
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,15" />
+                                
+                                <TextBlock Text="Клиент/Стр. Обект" Classes="label" />
+                                <TextBox Name="TxtNewClientName" 
+                                         Text="{Binding EntityToAdd.ClientName}"
+                                         
+                                         Watermark="Клиент/Строителен Обект" />
+                                
+                                
+                                <Button Classes="action-button" 
+                                        Content="Добави Клиент/Стр.Обект"
+                                        HorizontalAlignment="Right"
+                                        Click="OnAddClientClick" />
+                            </StackPanel>
+                        </Border>
+                        
                         <!-- Section: New Receipt -->
                         <Border Background="White" 
                                 Padding="20" 
@@ -258,6 +293,7 @@
                         <Border Background="White" 
                                 Padding="20" 
                                 CornerRadius="8"
+                                Margin="0,0,0,20"
                                 BoxShadow="0 2 8 0 #10000000">
                             <StackPanel>
                                 <TextBlock Text="Нов Материал" 
