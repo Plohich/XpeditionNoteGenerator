@@ -15,17 +15,15 @@ using AvalonXpeditionNoteGenerator.Enums;
 using FastReport;
 using FastReport.Export.PdfSimple;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using static AvalonXpeditionNoteGenerator.Constants.Constants;
 
 namespace AvalonXpeditionNoteGenerator;
 
 public partial class MainWindow : Window
 {
-        public  MainWindow()
-        {
-            InitializeComponent();
-            
-            Loaded += async (sender, e) =>
+    private CancellationTokenSource? currentCts;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -131,93 +129,92 @@ public partial class MainWindow : Window
                     });
                 }
 
-                    // Process.Start(new ProcessStartInfo
-                        // {
-                        //     FileName = pdfFileName,
-                        //     UseShellExecute = true,
-                        //     CreateNoWindow = true,
-                        //     Verb = "print",
-                        //     WindowStyle = ProcessWindowStyle.Hidden
-                        // });
-                        
-                }
-                
                 // Process.Start(new ProcessStartInfo
                 // {
-                //     FileName = @"C:\\Program Files (x86)\\Foxit Software\\Foxit PDF Reader\\FoxitPDFReader.exe",  // Main Foxit Reader executable
-                //     Arguments = $"/p \"D:\\Development\\AvalonXpeditionNoteGenerator\\AvalonXpeditionNoteGenerator\\ReportTemplate\\innosys.pdf\"",  // /p = print command
-                //     UseShellExecute = false,
-                //     CreateNoWindow = true
+                //     FileName = pdfFileName,
+                //     UseShellExecute = true,
+                //     CreateNoWindow = true,
+                //     Verb = "print",
+                //     WindowStyle = ProcessWindowStyle.Hidden
                 // });
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            finally
-            {
-                if (DataContext is MainWindowViewModel vm)
-                {
-                    vm.IsLoading = false;
-                }
-            }
+
+            // Process.Start(new ProcessStartInfo
+            // {
+            //     FileName = @"C:\\Program Files (x86)\\Foxit Software\\Foxit PDF Reader\\FoxitPDFReader.exe",  // Main Foxit Reader executable
+            //     Arguments = $"/p \"D:\\Development\\AvalonXpeditionNoteGenerator\\AvalonXpeditionNoteGenerator\\ReportTemplate\\innosys.pdf\"",  // /p = print command
+            //     UseShellExecute = false,
+            //     CreateNoWindow = true
+            // }); 
         }
-        
-        private async void OnPrintClick(object sender, RoutedEventArgs e)
+        catch (Exception ex)
         {
-            try
-            {
-                
-                if (DataContext is MainWindowViewModel
-                    {
-                        PrintableExpeditionNote :
-                        {
-                            SelectedReceipt: { } receipt ,
-                            SelectedTruck: { }  truck ,
-                            SelectedMaterial: {}  material ,
-                            SelectedDriver: {}  driver 
-                        } 
-                    } model)
-                { 
-                    model.IsLoading = true;
-                   var result = await model.PrepareReport();
-                   
-                        // Process.Start(new ProcessStartInfo
-                        // {
-                        //     FileName = pdfFileName,
-                        //     UseShellExecute = true,
-                        //     CreateNoWindow = true,
-                        //     Verb = "print",
-                        //     WindowStyle = ProcessWindowStyle.Hidden
-                        // });
-                        
-                        if (result)
-                        {
-                            model.IsLoading = false;
-                            
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = App.Settings.PathToPdfViewer, // Main Foxit Reader executable
-                                Arguments = $"/t \"{model.PrintableExpeditionNote.PdfDocumentPath}\"", // /p = print command /t = print and close
-                                UseShellExecute = false,
-                                CreateNoWindow = true
-                            });
-                        }
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                await MessageDialog.Show(this, SystemError,ex.ToString());
-            }
-            finally
-            {
-                if (DataContext is MainWindowViewModel vm)
-                {
-                    vm.IsLoading = false;
-                }
-            }  
+           Log.Error(ex, "Error while preparing report preview.");
         }
+        finally
+        {
+            if (DataContext is MainWindowViewModel vm)
+            {
+                vm.IsLoading = false;
+            }
+        }
+    }
+
+    private async void OnPrintClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (DataContext is MainWindowViewModel
+                {
+                    PrintableExpeditionNote :
+                    {
+                        SelectedReceipt: { } receipt,
+                        SelectedTruck: { } truck,
+                        SelectedMaterial: { } material,
+                        SelectedDriver: { } driver
+                    }
+                } model)
+            {
+                model.IsLoading = true;
+                var result = await model.PrepareReport();
+
+                // Process.Start(new ProcessStartInfo
+                // {
+                //     FileName = pdfFileName,
+                //     UseShellExecute = true,
+                //     CreateNoWindow = true,
+                //     Verb = "print",
+                //     WindowStyle = ProcessWindowStyle.Hidden
+                // });
+
+                if (result)
+                {
+                    model.IsLoading = false;
+
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = App.Settings.PathToPdfViewer, // Main Foxit Reader executable
+                        Arguments =
+                            $"/t \"{model.PrintableExpeditionNote.PdfDocumentPath}\"", // /p = print command /t = print and close
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error while printing report.");
+            await MessageDialog.Show(this, SystemError, ex.ToString());
+        }
+        finally
+        {
+            if (DataContext is MainWindowViewModel vm)
+            {
+                vm.IsLoading = false;
+            }
+        }
+    }
 
     private async void OnNewDocument(object sender, RoutedEventArgs e)
     {
@@ -260,6 +257,11 @@ public partial class MainWindow : Window
                 ShowMessage(InvalidDataMessage, EnterReceipt);
             }
         }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error while adding receipt.");
+        }
+    }
 
     private async void OnAddClientClick(object sender, RoutedEventArgs e)
     {
@@ -318,6 +320,11 @@ public partial class MainWindow : Window
                 ShowMessage(InvalidDataMessage, EnterDriver);
             }
         }
+        catch (Exception exception)
+        {
+            Log.Error(exception, "Error while adding driver.");
+        }
+    }
 
 
     private async void OnAddMaterialClick(object sender, RoutedEventArgs e)
@@ -344,8 +351,15 @@ public partial class MainWindow : Window
                 ShowMessage(InvalidDataMessage, EnterMaterial);
             }
         }
-        
-        private async void OnAddTruckClick(object sender, RoutedEventArgs e)
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error while adding material.");
+        }
+    }
+
+    private async void OnAddTruckClick(object sender, RoutedEventArgs e)
+    {
+        try
         {
             if (DataContext is MainWindowViewModel
                 {
@@ -369,53 +383,54 @@ public partial class MainWindow : Window
             }
 
         }
-        
-        // Helper method to show messages
-        private async void ShowMessage(string title, string message)
+        catch (Exception exception)
         {
-            try
-            {
-               await MessageDialog.Show(this, title, message);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            Log.Error(exception, "Error while adding truck.");
         }
-        
-        private void OnNumericUpDownKeyUp(object sender, KeyEventArgs e)
+    }
+
+    // Helper method to show messages
+    private async void ShowMessage(string title, string message)
+    {
+        try
         {
-            if (e.Key != Key.Enter)
-            {
-                return;
-            }
-            
-            // Move focus to next control or parent
-            if (sender is Control control)
-            {
-                CheckWater.Focus();
-            }
+            await MessageDialog.Show(this, title, message);
         }
-        
-        private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+        catch (Exception e)
         {
-            try
-            {
-                // Cancel closing temporarily
-                e.Cancel = true;
-            
-                await InsertNewNoteNumber();
-              
-            }
-            catch (Exception exception)
-            {
-                ShowMessage(SystemError, exception.Message);
-            }
-            finally
-            {
-                Closing -= OnWindowClosing;
-                Close();
-            }
-            
+            Console.WriteLine(e);
         }
+    }
+
+    private void OnNumericUpDownKeyUp(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+        {
+            return;
+        }
+
+        // Move focus to next control or parent
+        if (sender is Control control)
+        {
+            CheckWater.Focus();
+        }
+    }
+
+    private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        try
+        {
+            // Cancel closing temporarily
+            e.Cancel = true;
+
+            await InsertNewNoteNumber();
+            Log.Error(exception, "Error while closing application.");
+        }
+        finally
+        {
+            Closing -= OnWindowClosing;
+            await Log.CloseAndFlushAsync();  
+            Close();
+        }
+    }
 }

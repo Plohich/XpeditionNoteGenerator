@@ -16,6 +16,8 @@ namespace AvalonXpeditionNoteGenerator.Models;
 
 public partial class MainWindowViewModel : ObservableObject
 {
+    private readonly ILogger modelLogger;
+    
     // Using ObservableCollection is better for granular updates, when MainViewModel could have too big sub-collections(could cause UI issues)
     // But for now will stick to complete update of ViewModel, once some entity has been added just reload whole model
     private ObservableCollection<ReceiptType> _receiptTypes = new();
@@ -40,7 +42,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private bool isLoading;
 
-    private  MainWindowViewModel(List<ReceiptType> receipts, List<Truck> trucks, List<DriverType> drivers, List<MaterialType> materials, int initialNoteNumber)
+    private  MainWindowViewModel(ILogger logger, List<ReceiptType> receipts,  List<Truck> trucks, List<DriverType> drivers, List<MaterialType> materials, int initialNoteNumber)
     {
         Receipts = new (receipts);
         Trucks = trucks;
@@ -52,7 +54,7 @@ public partial class MainWindowViewModel : ObservableObject
         SpeditionNoteReport.Load(AppConfig.ReportTemplatePath);
     }
     
-    public static  async Task<MainWindowViewModel> LoadData()
+    public static  async Task<MainWindowViewModel> LoadData(ILogger logger)
     {
             
         await using var db = new AppDbContext(AppConfig.DatabasePath);
@@ -62,7 +64,7 @@ public partial class MainWindowViewModel : ObservableObject
         var materials = await db.Materials.ToListAsync();
         int maxGeneratedDocId = await db.PdfDocuments.AnyAsync() ? db.PdfDocuments.Max(d => d.Id) : App.Settings.InitialNoteNumber;
             
-        MainWindowViewModel vm = new MainWindowViewModel( receipts, trucks, drivers, materials, maxGeneratedDocId);
+        MainWindowViewModel vm = new MainWindowViewModel(logger, receipts, trucks, drivers, materials, maxGeneratedDocId);
             
         return vm;
             
@@ -81,7 +83,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            modelLogger.Error(e, "Error while refreshing receipts data source.");
             throw;
         }
 
@@ -192,7 +194,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            modelLogger.Error(e, "Error while saving entity.");
         }
         
         return result;
